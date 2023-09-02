@@ -1,53 +1,49 @@
----
 openapi: 3.0.0
+servers:
+  - description: CustomerAPI
+    url: https://virtserver.swaggerhub.com/JEGHTAMAS/CustomerAPI/1.0.0
+  - url: http://127.0.0.1:8000/api
+    description: Local testing server
 info:
+  description: 'Adott egy létező ügyfél adatbázis, amely a cég ügyfél adatait tárolja. Ezek: név, cím, ügyfél kód (lehet üres), szerződés dátuma. Készíteni kell egy PHP API-t, ami egy nagyobb rendszer komponense lesz, melyen keresztül ki lehet listázni az adatokat, új ügyfelet lehet menteni, és meglévőket módosítani. Legyen lehetőség arra, hogy az adatokat tömbösítve mentsük. Ezeket a műveleteket a lehető legkevesebb végponttal kell kiszolgálni.'
+  version: "1.0.0"
   title: Simple Customer API
-  description: "Adott egy létező ügyfél adatbázis, amely a cég ügyfél adatait tárolja. Ezek: név, cím, ügyfél kód (lehet üres), szerződés dátuma. Készíteni kell egy PHP API-t, ami egy nagyobb rendszer komponense lesz, melyen keresztül ki lehet listázni az adatokat, új ügyfelet lehet menteni, és meglévőket módosítani. Legyen lehetőség arra, hogy az adatokat tömbösítve mentsük. Ezeket a műveleteket a lehető legkevesebb végponttal kell kiszolgálni."
   contact:
     email: jeghtamas@gmail.com
   license:
     name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.0.0
-servers:
-- url: https://virtserver.swaggerhub.com/JEGHTAMAS/CustomerAPI/1.0.0
-  description: CustomerAPI
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
 tags:
-- name: customers
-  description: Operations to maintain customers
+  - name: customers
+    description: Operations to maintain customers
 paths:
   /customers:
     get:
       tags:
-      - customers
+        - customers
       summary: List all customers
+      operationId: list
       description: |
         You can list all of the registered customers in the system.
-      operationId: list
       parameters:
-      - name: skip
-        in: query
-        description: number of records to skip for pagination
-        required: false
-        style: form
-        explode: true
-        schema:
-          minimum: 0
-          type: integer
-          format: int32
-      - name: limit
-        in: query
-        description: maximum number of records to return
-        required: false
-        style: form
-        explode: true
-        schema:
-          maximum: 50
-          minimum: 0
-          type: integer
-          format: int32
+        - in: query
+          name: skip
+          description: number of records to skip for pagination
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+        - in: query
+          name: limit
+          description: maximum number of records to return
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            maximum: 50
       responses:
-        "200":
+        '200':
           description: search results matching criteria
           content:
             application/json:
@@ -55,140 +51,152 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Customer'
-        "400":
-          description: bad input parameter
-        "408":
-          description: Request can not be proceed due to resource limitations
-        "5XX":
+        '422':
+          description: bad input parameter i.e. invalid limit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '408':
+          description: 'Request can not be proceed due to resource limitations'
+        '5XX':
           description: Unexpected error.
     post:
       tags:
-      - customers
+        - customers
       summary: Add customers
-      description: Adds a customers to the system
       operationId: add
+      description: Adds a customers to the system
+      responses:
+        '201':
+          description: 'Item(s) are created'
+        '400':
+          description: 'Invalid input, object invalid'
+        '408':
+          description: 'Request can not be proceed due to resource limitations'
+        '409':
+          description: 'An existing item already exists'
+        '422':
+          description: Invalid input value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '5XX':
+          description: Unexpected error.
       requestBody:
-        description: List of customers to add
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CustomerCreationalRequest'
-      responses:
-        "201":
-          description: Item(s) are created
-        "400":
-          description: "Invalid input, object invalid"
-        "408":
-          description: Request can not be proceed due to resource limitations
-        "409":
-          description: An existing item already exists (customerCode))
-        "5XX":
-          description: Unexpected error.
-  /customers/{customerId}:
+        description: List of customers to add
+  /customers/{id}:
     get:
       tags:
-      - customers
+        - customers
       summary: Retrieve a customer
+      operationId: getById
       description: |
         You can get one  of the registered customers in the system.
-      operationId: getById
       parameters:
-      - name: customerId
-        in: path
-        description: ID of the customer to get
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-          format: uuid
-          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+            example: 'd290f1ee-6c54-4b01-90e6-d701748f0851'
+          required: true
+          description: 'ID of the customer to get'
       responses:
-        "200":
+        '200':
           description: specified customer
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Customer'
-        "404":
-          description: A customer with the specified ID was not found.
-        "408":
-          description: Request can not be proceed due to resource limitations
-        "5XX":
-          description: Unexpected error.
-    delete:
-      tags:
-      - customers
-      summary: Delete a customer
-      description: |
-        You can get one  of the registered customers in the system.
-      operationId: deleteById
-      parameters:
-      - name: customerId
-        in: path
-        description: ID of the customer to get
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-          format: uuid
-          example: d290f1ee-6c54-4b01-90e6-d701748f0851
-      responses:
-        "204":
-          description: User is not existing anymore
-        "404":
-          description: A customer with the specified ID was not found.
-        "408":
-          description: Request can not be proceed due to resource limitations
-        "5XX":
+        '404':
+          description: 'A customer with the specified ID was not found.'
+        '408':
+          description: 'Request can not be proceed due to resource limitations'
+        '5XX':
           description: Unexpected error.
     patch:
       tags:
-      - customers
+        - customers
       summary: Update a customer
+      operationId: updateById
       description: |
         You can get one  of the registered customers in the system.
-      operationId: updateById
       parameters:
-      - name: customerId
-        in: path
-        description: ID of the customer to get
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-          format: uuid
-          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+            example: 'd290f1ee-6c54-4b01-90e6-d701748f0851'
+          required: true
+          description: 'ID of the customer to get'
       requestBody:
-        description: Attributes to modify
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CustomerPatchRequest'
+        description: Attributes to modify
       responses:
-        "200":
+        '200':
           description: specified customer
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Customer'
-        "404":
-          description: A customer with the specified ID was not found.
-        "408":
-          description: Request can not be proceed due to resource limitations
-        "5XX":
+        '400':
+          description: 'Invalid input, object invalid'
+        '404':
+          description: 'A customer with the specified ID was not found.'
+        '408':
+          description: 'Request can not be proceed due to resource limitations'
+        '409':
+          description: 'An existing item already exists'
+        '422':
+          description: invalid input value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '5XX':
+          description: Unexpected error.
+    delete:
+      tags:
+        - customers
+      summary: Delete a customer
+      operationId: deleteById
+      description: |
+        You can get one  of the registered customers in the system.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+            example: 'd290f1ee-6c54-4b01-90e6-d701748f0851'
+          required: true
+          description: 'ID of the customer to get'
+      responses:
+        '204':
+          description: User is not existing anymore
+        '408':
+          description: 'Request can not be proceed due to resource limitations'
+        '5XX':
           description: Unexpected error.
 components:
   schemas:
     Customer:
-      required:
-      - address
-      - contractDate
-      - id
-      - name
       type: object
+      required:
+        - id
+        - name
+        - address
+        - contract_date
       properties:
         id:
           type: string
@@ -197,65 +205,84 @@ components:
         name:
           type: string
           example: Sample Customer
-        contractDate:
+        contract_date:
           type: string
           format: date-time
-          example: 2023-08-31T14:12:33.001Z
+          example: '2023-08-31T14:12:33.001Z'
         address:
           type: string
-          example: "Hungary, 2030 City, street 12/B"
-        customerCode:
+          example: 'Hungary, 2030 City, street 12/B'
+        customer_code:
           type: string
           nullable: true
-          example: CustomerCode-1
+          example: 'CustomerCode-1'
+          
     CustomerCreationalRequest:
       type: array
-      example:
-      - name: Sample Customer
-        contractDate: 2023-08-31T14:12:33.001Z
-        address: "Hungary, 2030 City, street 12/B"
-        customerCode: CustomerCode-1
-      - name: Sample Customer2
-        contractDate: 2020-08-31T14:12:33.001Z
-        address: "Hungary, 1091 City, street 12/B"
-        customerCode: CustomerCode-2
       items:
-        $ref: '#/components/schemas/CustomerCreationalRequest_inner'
+        type: object
+        required:
+          - name
+          - address
+          - contract_date
+        properties:
+          name:
+            type: string
+            example: Sample Customer
+          contract_date:
+            type: string
+            format: date-time
+            example: '2023-08-31T14:12:33.001Z'
+          address:
+            type: string
+            example: 'Hungary, 2030 City, street 12/B'
+          customer_code:
+            type: string
+            nullable: true
+            example: 'CustomerCode-1'
+      example:
+        - name: Sample Customer
+          contract_date: '2023-08-31T14:12:33.001Z'
+          address: Hungary, 2030 City, street 12/B
+          customer_code: CustomerCode-1
+          
+        - name: Sample Customer2
+          contract_date: '2020-08-31T14:12:33.001Z'
+          address: Hungary, 1091 City, street 12/B
+          customer_code: CustomerCode-2
+        
     CustomerPatchRequest:
       type: object
       properties:
         name:
           type: string
           example: Sample Customer
-        contractDate:
+        contract_date:
           type: string
           format: date-time
-          example: 2023-08-31T14:12:33.001Z
+          example: '2023-08-31T14:12:33.001Z'
         address:
           type: string
-          example: "Hungary, 2030 City, street 12/B"
-        customerCode:
+          example: 'Hungary, 2030 City, street 12/B'
+        customer_code:
           type: string
           nullable: true
-          example: CustomerCode-1
-    CustomerCreationalRequest_inner:
-      required:
-      - address
-      - contractDate
-      - name
+          example: 'CustomerCode-1'
+          
+    ValidationErrorResponse:
       type: object
       properties:
-        name:
+        message:
           type: string
-          example: Sample Customer
-        contractDate:
-          type: string
-          format: date-time
-          example: 2023-08-31T14:12:33.001Z
-        address:
-          type: string
-          example: "Hungary, 2030 City, street 12/B"
-        customerCode:
-          type: string
-          nullable: true
-          example: CustomerCode-1
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+      example: 
+        message: The limit field must not be greater than 50. (and 1 more error)
+        errors:
+          limit:
+            - The limit field must not be greater than 50.
+            - The limit field must be a multiple of 4.

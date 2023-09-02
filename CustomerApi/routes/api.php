@@ -13,7 +13,10 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::prefix('customers')->controller(\App\Http\Controllers\CustomerController::class)->group(function(){
+    Route::get('/', 'list')->name('customers.list');
+    Route::post('/', 'add')->name('customers.add');
+    Route::get('/{id}', 'getById')->name('customers.get');
+    Route::patch('/{id}', 'updateById')->name('customers.update');
+    Route::delete('/{id}', 'deleteById')->name('customers.delete');
 });

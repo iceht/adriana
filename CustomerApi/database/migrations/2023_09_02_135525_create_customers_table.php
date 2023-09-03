@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('customers', function (Blueprint $table) {
             $table->uuid('id');
             $table->string('name')->nullable(false);
-            $table->timestamp('contract_date')->nullable(false);
+            $table->string('contract_date')->nullable(false);
             $table->text('address')->nullable(false);
-            $table->string('customer_code');
+            $table->string('customer_code')->nullable(true);
         });
     }
 

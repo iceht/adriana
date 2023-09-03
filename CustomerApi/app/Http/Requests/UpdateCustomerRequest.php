@@ -22,10 +22,11 @@ class UpdateCustomerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "*.name" => "bail|max:255|distinct",
-            "*.contract_date" => "bail|date_format:Y-m-d\\TH:i:s.vP",
-            "*.address" => "bail|alpha_num",
-            "*.customer_code" => ""
+            "name" => "bail|max:255|distinct|required_without_all:contract_date,address,customer_code",
+            "contract_date" => "bail|date_format:Y-m-d\TH:i:s.v\Z|required_without_all:name,address,customer_code",
+            "address" => "bail|distinct|required_without_all:contract_date,name,customer_code",
+            "customer_code" => "bail|required_without_all:contract_date,address,name"
         ];
     }
+
 }

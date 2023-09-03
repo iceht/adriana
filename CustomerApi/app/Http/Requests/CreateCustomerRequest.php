@@ -23,8 +23,8 @@ class CreateCustomerRequest extends FormRequest
     {
         return [
             "*.name" => "bail|required|max:255|distinct",
-            "*.contract_date" => "bail|required|date_format:Y-m-d\\TH:i:s.vP",
-            "*.address" => "bail|required|alpha_num",
+            "*.contract_date" => "bail|required|date_format:Y-m-d\TH:i:s.v\Z",
+            "*.address" => "bail|required|distinct",
             "*.customer_code" => ""
         ];
     }
